@@ -276,9 +276,16 @@
                 }
             }
             // Rod: for some reason, config._d can look like {'$date':<timeInMillis>} even though a full search of all our
-            //      code and node_modules doesn't show any use of '$date' or a non-Date assignment to '*._d'
+            //      code and node_modules doesn't show any use of '$date' or a non-Date assignment to '*._d'.  My current thought
+            //      is that we're trying to send a moment object from the client to the server and Meteor DDP is serializing a
+            //      moment into {$date: <timeInMillis>}, even though a thorough code search didn't show us ever sending a moment
+            //      to/from the client or server.
             if (isNumber(config._d['$date'])) {
-                this._d = new Date(config._d['$date']);
+                var timeInMillis = config._d['$date'];
+                config._d = new Date(timeInMillis);
+                if (typeof console !== 'undefined' && console.log) {
+                    console.log("*** moment: config._d['$date'] is a number, so assuming it's time in millis (" + timeInMillis + "), which after repairing makes config._d=" + config._d);
+                }
             }
         }
         // Rod: try to prevent crash in the 'impossible' scenario
