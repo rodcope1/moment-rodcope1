@@ -259,7 +259,31 @@
     // Moment prototype object
     function Moment(config) {
         copyConfig(this, config);
-        this._d = new Date(config._d != null ? config._d.getTime() : NaN);
+        // Rod: changing moment to log a bunch when something impossible happens, that actually keeps happening
+        if ((config._d != null) && !(typeof config._d.getTime === 'function')) {
+            if (typeof console !== 'undefined' && console.log) {
+                console.log("*** moment: config._d.getTime is not a function, with config._d.getTime=", config._d.getTime);
+                console.log("*** moment: config._d.getTime is not a function, with JSON.stringify(config._d.getTime, null, 2)=", JSON.stringify(config._d.getTime, null, 2));
+                console.log("*** moment: config._d.getTime is not a function, with config._d=", config._d);
+                console.log("*** moment: config._d.getTime is not a function, with JSON.stringify(config._d, null, 2)=", JSON.stringify(config._d, null, 2));
+                try {
+                    throw new Error('Fake error to get stack');
+                }
+                catch (e) {
+                    console.log("*** moment: logging current stack to hopefully help us find the culprit:");
+                    console.log(e.stack);
+                    throw e;
+                }
+            }
+            // Rod: for some reason, config._d can look like {'$date':<timeInMillis>} even though a full search of all our
+            //      code and node_modules doesn't show any use of '$date' or a non-Date assignment to '*._d'
+            if (isNumber(config._d['$date'])) {
+                this._d = new Date(config._d['$date']);
+            }
+        }
+        // Rod: try to prevent crash in the 'impossible' scenario
+        //this._d = new Date(config._d != null ? config._d.getTime() : NaN);
+        this._d = new Date(config._d != null && (typeof config._d.getTime === 'function') ? config._d.getTime() : NaN);
         if (!this.isValid()) {
             this._d = new Date(NaN);
         }
@@ -1072,6 +1096,21 @@
                 regex =
                     '^' + this.months(mom, '') + '|^' + this.monthsShort(mom, '');
                 this._monthsParse[i] = new RegExp(regex.replace('.', ''), 'i');
+                // Rod: changing moment to log a bunch when something impossible happens, that actually keeps happening
+                if (!(typeof this._monthsParse[i].test === 'function')) {
+                    if (typeof console !== 'undefined' && console.log) {
+                        console.log("*** moment: just set RegExp but this._monthsParse[i].test is not a function, with this._monthsParse[i]=", this._monthsParse[i]);
+                        console.log("*** moment: just set RegExp but this._monthsParse[i].test is not a function, with JSON.stringify(this._monthsParse[i], null, 2)=", JSON.stringify(this._monthsParse[i], null, 2));
+                        try {
+                            throw new Error('Fake error to get stack');
+                        }
+                        catch (e) {
+                            console.log("*** moment: logging current stack to hopefully help us find the culprit:");
+                            console.log(e.stack);
+                            throw e;
+                        }
+                    }
+                }
             }
             // test the regex
             if (
@@ -1086,8 +1125,32 @@
                 this._shortMonthsParse[i].test(monthName)
             ) {
                 return i;
-            } else if (!strict && this._monthsParse[i].test(monthName)) {
-                return i;
+            // Rod: changing moment to log a bunch when something impossible happens, that actually keeps happening
+            //} else if (!strict && this._monthsParse[i].test(monthName)) {
+            } else if (!strict && this._monthsParse[i].test) {
+                if (!(typeof this._monthsParse[i].test === 'function')) {
+                    if (typeof console !== 'undefined' && console.log) {
+                        console.log("*** moment: this._monthsParse[i].test is no longer a function, with this._monthsParse[i]=", this._monthsParse[i]);
+                        console.log("*** moment: this._monthsParse[i].test is no longer a function, with JSON.stringify(this._monthsParse[i], null, 2)=", JSON.stringify(this._monthsParse[i], null, 2));
+                    }
+                    // Rod: try to prevent a crash in this 'impossible' situation by fixing the value before using it
+                    regex =
+                        '^' + this.months(mom, '') + '|^' + this.monthsShort(mom, '');
+                    this._monthsParse[i] = new RegExp(regex.replace('.', ''), 'i');
+                }
+                try {
+                    if (this._monthsParse[i].test(monthName)) {
+                        return i;
+                    }
+                }
+                catch (e) {
+                    // the impossible happened, so log what we can to help debugging
+                    if (typeof console !== 'undefined' && console.log) {
+                        console.log("*** moment failed, probably because this._monthsParse[i].test is no longer a function, with this._monthsParse[i]=", this._monthsParse[i]);
+                        console.log("*** moment failed, probably because this._monthsParse[i].test is no longer a function, with JSON.stringify(this._monthsParse[i], null, 2)=", JSON.stringify(this._monthsParse[i], null, 2));
+                    }
+                    throw e;
+                }
             }
         }
     }

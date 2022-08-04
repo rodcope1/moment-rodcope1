@@ -1,16 +1,8 @@
 {
-    "name": "moment",
-    "version": "2.29.4",
-    "description": "Parse, validate, manipulate, and display dates",
-    "homepage": "https://momentjs.com",
-    "author": "Iskren Ivov Chernev <iskren.chernev@gmail.com> (https://github.com/ichernev)",
-    "contributors": [
-        "Tim Wood <washwithcare@gmail.com> (http://timwoodcreates.com/)",
-        "Rocky Meza (http://rockymeza.com)",
-        "Matt Johnson <mj1856@hotmail.com> (http://codeofmatt.com)",
-        "Isaac Cambron <isaac@isaaccambron.com> (http://isaaccambron.com)",
-        "Andre Polykanine <andre@oire.org> (https://github.com/oire)"
-    ],
+    "name": "moment-rodcope1",
+    "version": "2.29.8",
+    "description": "Forked moment to debug impossible bugs",
+    "author": "Rod Cope",
     "keywords": [
         "moment",
         "date",
@@ -37,10 +29,7 @@
     },
     "repository": {
         "type": "git",
-        "url": "https://github.com/moment/moment.git"
-    },
-    "bugs": {
-        "url": "https://github.com/moment/moment/issues"
+        "url": "git+https://github.com/rodcope1/moment-rodcope1.git"
     },
     "license": "MIT",
     "devDependencies": {
