@@ -272,7 +272,6 @@
                 catch (e) {
                     console.log("*** moment: logging current stack to hopefully help us find the culprit:");
                     console.log(e.stack);
-                    throw e;
                 }
             }
             // Rod: for some reason, config._d can look like {'$date':<timeInMillis>} even though a full search of all our
@@ -1114,7 +1113,6 @@
                         catch (e) {
                             console.log("*** moment: logging current stack to hopefully help us find the culprit:");
                             console.log(e.stack);
-                            throw e;
                         }
                     }
                 }
